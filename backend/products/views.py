@@ -7,18 +7,26 @@ from orders.models import Commande
 from users.models import Utilisateur
 
 from rest_framework.permissions import AllowAny
+from users.permissions import IsAdminOrSuperAdmin, IsAdminOrReadOnly
 
 class CategorieViewSet(viewsets.ModelViewSet):
     queryset = Categorie.objects.all()
     serializer_class = CategorieSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAdminOrReadOnly]
 
 class PlanteViewSet(viewsets.ModelViewSet):
     queryset = Plante.objects.all()
     serializer_class = PlanteSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAdminOrReadOnly]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_authenticated and user.role in ['ADMIN', 'SUPERADMIN']:
+            return Plante.objects.all()
+        return Plante.objects.filter(stock__gt=0)
 
 class DashboardStatsView(views.APIView):
+    permission_classes = [IsAdminOrSuperAdmin]
     def get(self, request):
         total_sales = Commande.objects.filter(statut='DELIVERED').aggregate(Sum('total'))['total__sum'] or 0
         order_count = Commande.objects.count()

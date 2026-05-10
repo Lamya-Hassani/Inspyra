@@ -1,0 +1,63 @@
+@startuml Inspyra_Use_Case_Diagram
+title Inspyra — Use Case Diagram
+
+left to right direction
+
+actor "Client" as Client
+actor "Administrateur" as Admin
+
+  usecase "Voir le détail d'une plante" as UC_Detail
+  usecase "Parcourir catégories / plantes" as UC_API_Catalog
+
+
+  usecase "S'inscrire" as UC_Reg
+  usecase "Se connecter" as UC_Login
+  usecase "Gérer compte" as UC_Compte
+
+
+  usecase "Gérer le panier" as UC_UserCart
+  usecase "Passer commande (checkout)" as UC_Checkout
+  usecase "Voir l'historique des commandes" as UC_History
+
+  usecase "Configurer préférences & recevoir recommandations" as UC_Finder
+  usecase "Gérer liste de souhaits" as UC_Wish
+  usecase "Consulter son profil" as UC_ViewPrefs
+
+  usecase "CRUD plantes" as UC_Plants
+  usecase "CRUD catégories" as UC_Cats
+  usecase "Suivi / mise à jour statut commandes" as UC_Orders
+  usecase "CRUD utilisateurs" as UC_Users
+  usecase "Consulter les préférences des clients" as UC_AdminPrefs
+  
+
+Client --> UC_UserCart
+Client --> UC_Checkout
+Client --> UC_History
+Client --> UC_Finder
+Client --> UC_Wish
+Client --> UC_Reg
+Client --> UC_API_Catalog
+Client --> UC_Detail
+Client --> UC_Compte
+Client --> UC_ViewPrefs
+
+UC_Detail --> UC_API_Catalog : <<extend>>
+
+UC_Checkout --> UC_Login : <<include>>
+UC_History --> UC_Login : <<include>>
+UC_ViewPrefs --> UC_Login : <<include>>
+UC_Plants --> UC_Login : <<include>>
+UC_Cats --> UC_Login : <<include>>
+UC_Orders --> UC_Login : <<include>>
+UC_Users --> UC_Login : <<include>>
+UC_AdminPrefs --> UC_Login : <<include>>
+
+Admin --> UC_Plants
+Admin --> UC_Cats
+Admin --> UC_Orders
+Admin --> UC_Users
+Admin --> UC_Compte
+Admin --> UC_AdminPrefs
+
+
+@enduml

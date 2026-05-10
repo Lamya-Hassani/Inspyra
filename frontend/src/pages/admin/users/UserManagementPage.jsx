@@ -50,9 +50,9 @@ const UserManagementPage = () => {
       setUsers((prev) => [...prev, response.data]);
       setNewUser(emptyUser);
       setShowAddModal(false);
-      toast.success('Membre ajouté avec succès');
+      toast.success('Membre ajouté');
     } catch (error) {
-      toast.error(error.response?.data?.username?.[0] || 'Erreur lors de l\'ajout');
+      toast.error('Erreur lors de l\'ajout');
     }
   };
 
@@ -64,9 +64,7 @@ const UserManagementPage = () => {
     }
     
     try {
-      // Create a copy without confirmPassword for the API
       const { confirmPassword, ...updateData } = activeUser;
-      // Remove password if empty to not overwrite it with empty string
       if (!updateData.password) delete updateData.password;
 
       const response = await API.put(`users/${activeUser.id}/`, updateData);
@@ -81,35 +79,91 @@ const UserManagementPage = () => {
   const handleToggleActive = (id, currentStatus) =>
     setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, is_active: !currentStatus } : u)));
 
-  if (loading) return <LoadingState />;
+  if (loading) return (
+    <div className="h-full flex flex-col items-center justify-center gap-4 text-[#274d00]">
+      <Loader2 className="w-10 h-10 animate-spin" />
+      <p className="font-bold text-sm uppercase tracking-widest">Chargement des membres...</p>
+    </div>
+  );
 
   return (
-    <div className="space-y-8 animate-fade-in relative pb-10">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="max-w-xl">
-          <h2 className="text-3xl sm:text-4xl font-black text-emerald-900 dark:text-white tracking-tight leading-tight">Gestion des <span className="text-gradient">Membres</span></h2>
-          <p className="text-xs sm:text-sm text-emerald-800/50 dark:text-emerald-100/50 font-medium mt-1">Administrez les roles et les acces de votre communaute.</p>
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+        <div>
+          <h2 className="text-3xl font-bold text-gray-900">Gestion des utilisateurs</h2>
+          <p className="text-gray-500 mt-1">Gérez les rôles et les accès de votre communauté.</p>
         </div>
-        <button onClick={() => setShowAddModal(true)} className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-4 rounded-2xl font-black shadow-xl shadow-emerald-600/20 transition-all flex items-center justify-center gap-3 text-sm"><UserPlus size={18} />Ajouter un Membre</button>
+        <button 
+          onClick={() => setShowAddModal(true)} 
+          className="px-6 py-3 bg-[#274d00] text-white rounded-lg font-bold flex items-center gap-2 hover:bg-[#1e3b00] transition-colors shadow-lg"
+        >
+          <UserPlus size={20} /> Ajouter un utilisateur
+        </button>
       </div>
 
+      {/* Filter Bar */}
       <div className="flex flex-col lg:flex-row gap-4">
-        <div className="relative flex-1"><Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-emerald-500/40" /><input type="text" placeholder="Rechercher par nom ou email..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full glass pl-14 pr-6 py-4 rounded-[1.5rem] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 font-bold transition-all border border-white/10" /></div>
-        <div className="flex gap-4"><select value={filter} onChange={(e) => setFilter(e.target.value)} className="glass px-6 py-4 rounded-[1.5rem] font-black text-[10px] uppercase tracking-widest text-emerald-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all border border-white/10"><option value="ALL">Tous les Filtres</option>{currentUser?.role === 'SUPERADMIN' ? <><option value="ADMIN">Admins Uniquement</option><option value="CLIENT">Clients Uniquement</option><option value="SUPERADMIN">Super Admins</option></> : <><option value="ACTIVE">Actifs Uniquement</option><option value="INACTIVE">Desactives Uniquement</option></>}</select><button className="glass px-6 py-4 rounded-[1.5rem] font-black text-[10px] uppercase tracking-widest text-emerald-900 dark:text-white hover:bg-white/40 transition-all flex items-center gap-2 border border-white/10"><Download size={16} />Exporter</button></div>
+        <div className="relative flex-1">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+          <input 
+            type="text" 
+            placeholder="Rechercher par nom ou email..." 
+            value={searchTerm} 
+            onChange={(e) => setSearchTerm(e.target.value)} 
+            className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#92B061] font-bold text-sm transition-colors" 
+          />
+        </div>
+        <div className="flex gap-4">
+          <select 
+            value={filter} 
+            onChange={(e) => setFilter(e.target.value)} 
+            className="px-4 py-3 rounded-lg border border-gray-200 font-bold text-sm outline-none focus:border-[#92B061] transition-colors bg-white"
+          >
+            <option value="ALL">Tous les utilisateurs</option>
+            {currentUser?.role === 'SUPERADMIN' ? (
+              <>
+                <option value="ADMIN">Administrateurs</option>
+                <option value="CLIENT">Clients</option>
+                <option value="SUPERADMIN">Super Admins</option>
+              </>
+            ) : (
+              <>
+                <option value="ACTIVE">Actifs</option>
+                <option value="INACTIVE">Désactivés</option>
+              </>
+            )}
+          </select>
+          <button className="px-4 py-3 bg-white border border-gray-200 rounded-lg font-bold text-xs uppercase tracking-widest text-gray-600 hover:bg-gray-50 transition-colors flex items-center gap-2">
+            <Download size={16} /> Exporter
+          </button>
+        </div>
       </div>
 
-      <UserTable users={filteredUsers} onToggleActive={handleToggleActive} onView={(user) => setDetailUser(user)} onEdit={(user) => { setActiveUser(user); setShowEditModal(true); }} />
-      <UserFormModal isOpen={showAddModal || showEditModal} isAddMode={showAddModal} user={showAddModal ? newUser : activeUser} onClose={() => { setShowAddModal(false); setShowEditModal(false); }} onSubmit={showAddModal ? handleAddUser : handleUpdateUser} onChange={(key, value) => showAddModal ? setNewUser((prev) => ({ ...prev, [key]: value })) : setActiveUser((prev) => ({ ...prev, [key]: value }))} />
-      <UserDetailModal isOpen={Boolean(detailUser)} user={detailUser} onClose={() => setDetailUser(null)} onEdit={() => { setActiveUser(detailUser); setDetailUser(null); setShowEditModal(true); }} />
+      <UserTable 
+        users={filteredUsers} 
+        onToggleActive={handleToggleActive} 
+        onView={(user) => setDetailUser(user)} 
+        onEdit={(user) => { setActiveUser(user); setShowEditModal(true); }} 
+      />
+
+      <UserFormModal 
+        isOpen={showAddModal || showEditModal} 
+        isAddMode={showAddModal} 
+        user={showAddModal ? newUser : activeUser} 
+        onClose={() => { setShowAddModal(false); setShowEditModal(false); }} 
+        onSubmit={showAddModal ? handleAddUser : handleUpdateUser} 
+        onChange={(key, value) => showAddModal ? setNewUser(prev => ({ ...prev, [key]: value })) : setActiveUser(prev => ({ ...prev, [key]: value }))} 
+      />
+
+      <UserDetailModal 
+        isOpen={Boolean(detailUser)} 
+        user={detailUser} 
+        onClose={() => setDetailUser(null)} 
+        onEdit={() => { setActiveUser(detailUser); setDetailUser(null); setShowEditModal(true); }} 
+      />
     </div>
   );
 };
-
-const LoadingState = () => (
-  <div className="h-full flex flex-col items-center justify-center gap-4 text-emerald-600">
-    <Loader2 className="w-12 h-12 animate-spin" />
-    <p className="font-black uppercase tracking-widest text-sm">Chargement des membres...</p>
-  </div>
-);
 
 export default UserManagementPage;

@@ -1,11 +1,21 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Leaf, Lock, User, Loader2, ArrowRight, Mail, Sparkles, ShieldCheck } from 'lucide-react';
+import { Lock, User, Loader2, ArrowRight, Mail, Phone, MapPin, Globe, Compass } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const Register = () => {
-  const [formData, setFormData] = useState({ username: '', email: '', password: '', role: 'ADMIN' });
-  const [error, setError] = useState('');
+  const [formData, setFormData] = useState({ 
+    username: '', 
+    email: '', 
+    password: '', 
+    telephone: '',
+    adresse: '',
+    ville: '',
+    codePostal: '',
+    pays: 'Maroc',
+    role: 'CLIENT' 
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
@@ -13,133 +23,185 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setError('');
     const res = await register(formData);
     if (res.success) {
-      navigate('/admin');
+      toast.success("Compte créé avec succès ! Bienvenue !");
+      navigate('/');
     } else {
-      setError(res.error);
+      toast.error(res.error || "Erreur lors de l'inscription.");
       setIsSubmitting(false);
     }
   };
 
+  const inputClass = "w-full pl-10 pr-4 py-3 rounded-xl border border-gray-100 focus:border-[#6D58C7] focus:ring-4 focus:ring-purple-500/5 outline-none font-bold text-sm transition-all bg-white shadow-sm";
+  const labelClass = "block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2 ml-1";
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-emerald-100/60 dark:from-emerald-950 dark:via-slate-950 dark:to-emerald-900 flex items-center justify-center p-3 sm:p-4 relative overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(16,185,129,0.14),transparent_40%),radial-gradient(circle_at_80%_80%,rgba(6,95,70,0.16),transparent_35%)]"></div>
-      <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-600/30 blur-[120px] rounded-full animate-soft-pulse"></div>
-      <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-emerald-900/40 blur-[120px] rounded-full animate-soft-pulse"></div>
-      {[...Array(5)].map((_, i) => (
-        <Leaf
-          key={i}
-          className="absolute hidden sm:block text-emerald-300/30 animate-leaf-drift"
-          style={{
-            top: `${12 + i * 11}%`,
-            left: `${i % 2 === 0 ? 7 + i * 7 : 79 - i * 5}%`,
-            animationDelay: `${i * 0.5}s`,
-            animationDuration: `${5 + (i % 4)}s`,
-          }}
-          size={16 + (i % 3) * 6}
-        />
-      ))}
+    <div className="min-h-screen bg-gradient-to-br from-[#274d00]/20 via-white to-[#6D58C7]/20 flex items-center justify-center p-6 sm:p-12">
+      <div className="w-full max-w-2xl bg-white rounded-[2.5rem] border border-gray-100 shadow-2xl p-8 sm:p-12 relative overflow-hidden">
+        {/* Decorative elements */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-[#274d00]/5 rounded-full blur-3xl -z-0 translate-x-1/2 -translate-y-1/2"></div>
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#6D58C7]/5 rounded-full blur-3xl -z-0 -translate-x-1/2 translate-y-1/2"></div>
 
-      <div className="w-full max-w-5xl relative z-10 animate-fade-in grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-        <div className="hidden lg:flex flex-col justify-between glass rounded-[3rem] p-10 border border-emerald-200/20">
-          <div>
-            <span className="inline-flex items-center gap-2 text-emerald-300 text-xs font-black uppercase tracking-widest mb-6">
-              <Sparkles size={14} />
-              Création de Compte
-            </span>
-            <h2 className="text-4xl font-black leading-tight text-emerald-950 dark:text-white">
-              Lancez votre espace admin botanique en quelques secondes.
-            </h2>
-            <p className="text-emerald-900/60 dark:text-emerald-100/60 mt-4 text-sm">
-              Configurez votre compte et accédez à un back-office e-commerce conçu pour vendre des plantes avec élégance.
-            </p>
-          </div>
-          <div className="glass rounded-2xl p-4 border border-white/10 flex items-center gap-3 animate-sway">
-            <ShieldCheck className="text-emerald-400" />
-            <p className="text-xs text-emerald-100/70 font-semibold">Onboarding sécurisé, expérience premium et rapide.</p>
-          </div>
-        </div>
-
-        <div className="glass w-full p-7 sm:p-12 rounded-[2.2rem] sm:rounded-[3rem] border border-white/10 shadow-2xl relative">
-          <div className="flex flex-col items-center text-center mb-10">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-700 flex items-center justify-center shadow-lg shadow-emerald-500/20 mb-6 animate-sway">
-              <Leaf className="text-white w-8 h-8" />
-            </div>
-            <h1 className="text-3xl font-black tracking-tight text-emerald-950 dark:text-white mb-2">
-              Rejoindre INS<span className="text-emerald-500">PYRA</span>
-            </h1>
-            <p className="text-sm font-medium text-emerald-900/50 dark:text-emerald-100/50">Créez votre compte administrateur.</p>
+        <div className="relative z-10">
+          {/* Header */}
+          <div className="text-center mb-12">
+            <Link to="/" className="inline-flex items-center gap-3 mb-6 group">
+              <div className="w-12 h-12 bg-[#274d00] rounded-xl flex items-center justify-center text-white font-black text-2xl shadow-lg group-hover:bg-[#6D58C7] transition-colors">I</div>
+              <span className="text-3xl font-black tracking-tighter text-[#274d00]">INSPYRA</span>
+            </Link>
+            <h1 className="text-3xl font-black text-[#274d00] tracking-tight">Rejoindre la communauté</h1>
+            <p className="text-gray-400 mt-2 font-medium italic">Commencez votre aventure botanique dès aujourd'hui.</p>
           </div>
 
-          {error && (
-            <div className="mb-6 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-xs font-bold text-center">
-              {error}
-            </div>
-          )}
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Account Info */}
+              <div className="space-y-5">
+                <p className="text-[10px] font-black text-[#6D58C7] uppercase tracking-[0.3em] mb-4 border-b border-purple-50 pb-2">Informations de compte</p>
+                
+                <div>
+                  <label className={labelClass}>Identifiant</label>
+                  <div className="relative">
+                    <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
+                    <input
+                      type="text"
+                      required
+                      value={formData.username}
+                      onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                      className={inputClass}
+                      placeholder="Nom d'utilisateur"
+                    />
+                  </div>
+                </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label className="block text-[10px] font-black uppercase text-emerald-500 mb-2 tracking-widest pl-2">Nom d'utilisateur</label>
-              <div className="relative">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-emerald-500/50" />
-                <input
-                  type="text"
-                  required
-                  value={formData.username}
-                  onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                  className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white/40 dark:bg-white/5 border border-white/10 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 text-emerald-950 dark:text-white font-bold transition-all"
-                  placeholder="Votre identifiant..."
-                />
+                <div>
+                  <label className={labelClass}>Email</label>
+                  <div className="relative">
+                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
+                    <input
+                      type="email"
+                      required
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      className={inputClass}
+                      placeholder="Ex: contact@exemple.com"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className={labelClass}>Mot de passe</label>
+                  <div className="relative">
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
+                    <input
+                      type="password"
+                      required
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      className={inputClass}
+                      placeholder="••••••••"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className={labelClass}>Téléphone</label>
+                  <div className="relative">
+                    <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
+                    <input
+                      type="tel"
+                      required
+                      value={formData.telephone}
+                      onChange={(e) => setFormData({ ...formData, telephone: e.target.value })}
+                      className={inputClass}
+                      placeholder="06 XX XX XX XX"
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
 
-            <div>
-              <label className="block text-[10px] font-black uppercase text-emerald-500 mb-2 tracking-widest pl-2">Email</label>
-              <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-emerald-500/50" />
-                <input
-                  type="email"
-                  required
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white/40 dark:bg-white/5 border border-white/10 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 text-emerald-950 dark:text-white font-bold transition-all"
-                  placeholder="Ex: admin@inspyra.com"
-                />
-              </div>
-            </div>
+              {/* Delivery Info */}
+              <div className="space-y-5">
+                <p className="text-[10px] font-black text-[#6D58C7] uppercase tracking-[0.3em] mb-4 border-b border-purple-50 pb-2">Adresse de livraison</p>
+                
+                <div>
+                  <label className={labelClass}>Adresse complète</label>
+                  <div className="relative">
+                    <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
+                    <input
+                      type="text"
+                      required
+                      value={formData.adresse}
+                      onChange={(e) => setFormData({ ...formData, adresse: e.target.value })}
+                      className={inputClass}
+                      placeholder="N°, Rue, Quartier"
+                    />
+                  </div>
+                </div>
 
-            <div>
-              <label className="block text-[10px] font-black uppercase text-emerald-500 mb-2 tracking-widest pl-2">Mot de passe</label>
-              <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-emerald-500/50" />
-                <input
-                  type="password"
-                  required
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white/40 dark:bg-white/5 border border-white/10 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 text-emerald-950 dark:text-white font-bold transition-all"
-                  placeholder="••••••••"
-                />
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className={labelClass}>Ville</label>
+                    <div className="relative">
+                      <Compass className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
+                      <input
+                        type="text"
+                        required
+                        value={formData.ville}
+                        onChange={(e) => setFormData({ ...formData, ville: e.target.value })}
+                        className={inputClass}
+                        placeholder="Ex: Casablanca"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className={labelClass}>Code Postal</label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.codePostal}
+                      onChange={(e) => setFormData({ ...formData, codePostal: e.target.value })}
+                      className={inputClass}
+                      placeholder="20000"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className={labelClass}>Pays</label>
+                  <div className="relative">
+                    <Globe className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
+                    <input
+                      type="text"
+                      required
+                      value={formData.pays}
+                      onChange={(e) => setFormData({ ...formData, pays: e.target.value })}
+                      className={inputClass}
+                      placeholder="Maroc"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 
             <button
               disabled={isSubmitting}
-              className="w-full mt-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-black shadow-xl shadow-emerald-500/20 transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-sm disabled:opacity-70"
+              className="w-full mt-6 py-5 bg-[#274d00] text-white rounded-2xl font-black flex items-center justify-center gap-3 hover:bg-[#6D58C7] transition-all shadow-xl hover:shadow-purple-100 disabled:opacity-70 uppercase tracking-[0.2em] text-xs"
             >
-              {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : (
-                <>S'inscrire <ArrowRight className="w-5 h-5" /></>
+              {isSubmitting ? <Loader2 className="animate-spin" size={20} /> : (
+                <>Créer mon compte <ArrowRight size={20} /></>
               )}
             </button>
           </form>
 
-          <p className="mt-8 text-center text-xs text-emerald-900/45 dark:text-emerald-100/40 font-medium">
-            Déjà un compte ? <Link to="/login" className="text-emerald-500 hover:text-emerald-400 font-bold transition-colors">Se connecter</Link>
-          </p>
-          <p className="text-[10px] text-center text-emerald-900/35 dark:text-emerald-200/40 font-semibold mt-3 uppercase tracking-widest">
-            Plant Commerce Suite
+          {/* Footer */}
+          <p className="mt-10 text-center text-sm text-gray-400 font-medium">
+            Déjà membre ?{" "}
+            <Link to="/login" className="text-[#6D58C7] font-black hover:text-[#274d00] transition-colors underline underline-offset-8 decoration-2 decoration-purple-100">
+              Se connecter à mon espace
+            </Link>
           </p>
         </div>
       </div>

@@ -1,0 +1,24 @@
+@startuml Inspyra_Sequence_PlantFinder
+title Sequence — Plant Finder (UserPreference + recommendations)
+
+actor "Client" as C
+participant "PlantFinder" as PF
+participant "Backend" as BE
+database "MySQL" as DB
+
+C -> PF : ouvrir /plant-finder
+PF -> BE : getPreferences()
+BE -> DB : get_or_create UserPreference
+DB --> BE : préférences
+BE --> PF : JSON
+
+C -> PF : terminer le questionnaire
+PF -> BE : updatePreferences(data)
+BE -> DB : update UserPreference
+
+PF -> BE : getRecommendations()
+BE -> DB : Plante.objects.filter(..)
+DB --> BE : queryset
+BE --> PF : liste Plante recommendées
+
+@enduml

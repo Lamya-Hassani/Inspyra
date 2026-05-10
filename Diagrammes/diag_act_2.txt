@@ -1,0 +1,70 @@
+@startuml
+title Activité — Espace administration
+
+start
+:Ouvrir la zone administration;
+if (Identifié en tant qu'administrateur ?) then (non)
+  :Se connecter avec un compte admin;
+  if (Accès autorisé ?) then (non)
+    :Retour au site public;
+    stop
+  endif
+endif
+:Afficher le tableau de bord;
+if (Consulter les statistiques ?) then (oui)
+  :Voir ventes, commandes, clients et plantes;
+endif
+if (Exporter un rapport ?) then (oui)
+  :Télécharger le fichier récapitulatif;
+endif
+if (Gérer le catalogue ?) then (oui)
+  :Voir la liste des plantes;
+  if (Ajouter ou modifier une plante ?) then (oui)
+    :Enregistrer la fiche et la photo;
+  endif
+  if (Supprimer une plante ?) then (oui)
+    :Retirer la plante du catalogue;
+  endif
+endif
+if (Gérer les catégories ?) then (oui)
+  :Voir la liste des catégories;
+  if (Créer ou modifier une catégorie ?) then (oui)
+    :Enregistrer la catégorie;
+  endif
+  if (Supprimer une catégorie ?) then (oui)
+    :Retirer la catégorie;
+  endif
+endif
+if (Suivre les commandes ?) then (oui)
+  :Voir la liste des commandes;
+  if (Filtrer ou rechercher ?) then (oui)
+    :Afficher les commandes correspondantes;
+  endif
+  if (Changer le statut d'une commande ?) then (oui)
+    :Mettre à jour l'état de la commande;
+  endif
+  if (Voir le détail d'une commande ?) then (oui)
+    :Ouvrir la fiche commande;
+  endif
+  if (Exporter la liste ?) then (oui)
+    :Télécharger le fichier des commandes;
+  endif
+endif
+if (Gérer les utilisateurs ?) then (oui)
+  :Voir la liste des membres;
+  if (Ajouter un membre ?) then (oui)
+    :Créer le compte et le rôle;
+  endif
+  if (Modifier un membre ?) then (oui)
+    :Mettre à jour les informations;
+  endif
+  if (Voir le profil d'un membre ?) then (oui)
+    :Ouvrir la fiche membre;
+  endif
+endif
+if (Quitter l'administration ?) then (oui)
+  :Se déconnecter;
+endif
+stop
+
+@enduml

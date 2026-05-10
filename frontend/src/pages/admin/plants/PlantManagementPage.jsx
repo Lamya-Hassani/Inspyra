@@ -58,8 +58,12 @@ const PlantManagementPage = () => {
 
   const handleDelete = async (id) => {
     if (!window.confirm('Voulez-vous supprimer cette plante du catalogue ?')) return;
-    await API.delete(`products/plantes/${id}/`);
-    setPlants((prev) => prev.filter((p) => p.id !== id));
+    try {
+      await API.delete(`products/plantes/${id}/`);
+      setPlants((prev) => prev.filter((p) => p.id !== id));
+    } catch (err) {
+      console.error('Delete failed', err);
+    }
   };
 
   const handleImageSelection = (event, mode) => {
@@ -92,34 +96,85 @@ const PlantManagementPage = () => {
     closeFormModal();
   };
 
-  if (loading) return <LoadingState />;
+  if (loading) return (
+    <div className="h-full flex flex-col items-center justify-center gap-4 text-[#274d00]">
+      <Loader2 className="w-10 h-10 animate-spin" />
+      <p className="font-bold text-sm uppercase tracking-widest">Chargement du catalogue...</p>
+    </div>
+  );
 
   return (
-    <div className="space-y-8 animate-fade-in relative pb-10">
-      <HeaderStats plants={plants} categories={categories} />
-      <TopBar onAdd={() => setShowAddModal(true)} />
-      <FilterBar
-        categories={categories}
-        filteredCount={filteredPlants.length}
-        searchTerm={searchTerm}
-        selectedCategory={selectedCategory}
-        setSearchTerm={setSearchTerm}
-        setSelectedCategory={setSelectedCategory}
-      />
-      {filteredPlants.length === 0 && <EmptyState />}
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
-        {filteredPlants.map((plant) => (
-          <PlantCard
-            key={plant.id}
-            plant={plant}
-            onEdit={() => { setActivePlant(plant); setShowEditModal(true); }}
-            onDelete={() => handleDelete(plant.id)}
-            onView={() => { setActivePlant(plant); setShowDetailModal(true); }}
-          />
-        ))}
+    <div className="space-y-12">
+      {/* Top Bar */}
+      <div className="bg-white rounded-[2.5rem] border border-gray-100 p-10 shadow-sm relative overflow-hidden group">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-green-50/50 rounded-full blur-3xl -z-0 translate-x-1/2 -translate-y-1/2"></div>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 relative z-10">
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-1 bg-[#6D58C7] rounded-full"></div>
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#6D58C7]">Inventaire</p>
+            </div>
+            <h2 className="text-4xl font-black text-[#274d00] tracking-tight">Gestion des plantes</h2>
+            <p className="text-gray-500 mt-2 font-medium italic">"Consultez et modifiez votre catalogue botanique."</p>
+          </div>
+          <button 
+            onClick={() => setShowAddModal(true)} 
+            className="px-8 py-4 bg-[#274d00] text-white rounded-2xl font-black text-[11px] uppercase tracking-widest flex items-center gap-3 hover:bg-[#6D58C7] transition-all shadow-xl hover:shadow-purple-100"
+          >
+            <Plus size={20} /> Nouvelle Plante
+          </button>
+        </div>
       </div>
 
+      {/* Filter Bar */}
+      <div className="flex flex-col lg:flex-row gap-4 items-stretch">
+        <div className="relative flex-1 group">
+          <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#6D58C7] transition-colors" size={20} />
+          <input 
+            type="text" 
+            placeholder="Rechercher une espèce par son nom..." 
+            value={searchTerm} 
+            onChange={(e) => setSearchTerm(e.target.value)} 
+            className="w-full pl-14 pr-6 py-4 rounded-2xl bg-white border border-gray-100 focus:border-[#6D58C7] focus:ring-4 focus:ring-purple-500/5 outline-none font-bold text-sm transition-all"
+          />
+        </div>
+        <div className="flex gap-4">
+          <select 
+            value={selectedCategory} 
+            onChange={(e) => setSelectedCategory(e.target.value)} 
+            className="px-6 py-4 rounded-2xl border border-gray-100 font-black text-[11px] uppercase tracking-widest outline-none focus:border-[#6D58C7] transition-all bg-white cursor-pointer shadow-sm"
+          >
+            <option value="ALL">Toutes les catégories</option>
+            {categories.map((cat) => <option key={cat.id} value={cat.id}>{cat.nom}</option>)}
+          </select>
+          <div className="px-6 py-4 rounded-2xl bg-[#274d00] text-white text-[11px] font-black uppercase tracking-widest flex items-center shadow-lg shadow-green-100">
+            {filteredPlants.length} Résultats
+          </div>
+        </div>
+      </div>
+
+      {/* Results Grid */}
+      {filteredPlants.length === 0 ? (
+        <div className="py-24 text-center bg-gray-50 rounded-xl border border-dashed border-gray-200">
+          <AlertCircle className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+          <h3 className="text-xl font-bold text-gray-900 mb-2">Aucune plante trouvée</h3>
+          <p className="text-gray-500">Essayez d'ajuster vos filtres de recherche.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          {filteredPlants.map((plant) => (
+            <PlantCard
+              key={plant.id}
+              plant={plant}
+              onEdit={() => { setActivePlant(plant); setShowEditModal(true); }}
+              onDelete={() => handleDelete(plant.id)}
+              onView={() => { setActivePlant(plant); setShowDetailModal(true); }}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Modals */}
       <PlantFormModal
         isOpen={showAddModal || showEditModal}
         isAddMode={showAddModal}
@@ -128,7 +183,7 @@ const PlantManagementPage = () => {
         previewImage={showAddModal ? newPlantPreview : activePlantPreview}
         onClose={closeFormModal}
         onSubmit={showAddModal ? submitAddPlant : submitEditPlant}
-        onPlantChange={(key, value) => showAddModal ? setNewPlant((prev) => ({ ...prev, [key]: value })) : setActivePlant((prev) => ({ ...prev, [key]: value }))}
+        onPlantChange={(key, value) => showAddModal ? setNewPlant(prev => ({ ...prev, [key]: value })) : setActivePlant(prev => ({ ...prev, [key]: value }))}
         onImageSelect={(event) => handleImageSelection(event, showAddModal ? 'add' : 'edit')}
       />
 
@@ -142,41 +197,10 @@ const PlantManagementPage = () => {
   );
 };
 
-const LoadingState = () => (
-  <div className="h-full flex flex-col items-center justify-center gap-4 text-emerald-600">
-    <Loader2 className="w-12 h-12 animate-spin" />
-    <p className="font-black uppercase tracking-widest text-sm text-center">Inspirations botaniques en cours...</p>
-  </div>
-);
-
-const EmptyState = () => (
-  <div className="glass p-20 rounded-[3rem] text-center space-y-4">
-    <div className="bg-emerald-500/10 w-20 h-20 rounded-full flex items-center justify-center mx-auto text-emerald-500"><AlertCircle size={40} /></div>
-    <h3 className="text-2xl font-black text-emerald-900 dark:text-white">Aucune plante trouvée</h3>
-    <p className="text-emerald-800/50 dark:text-emerald-100/50 font-medium">Ajustez vos filtres pour explorer d'autres variétés.</p>
-  </div>
-);
-
-const HeaderStats = ({ plants, categories }) => (
-  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-    <Metric title="Catalogue Total" value={plants.length} />
-    <Metric title="Stock Critique" value={plants.filter((p) => p.stock <= 5).length} valueClassName="text-rose-500" />
-    <Metric title="Catégories" value={categories.length} />
-  </div>
-);
-
-const Metric = ({ title, value, valueClassName = 'text-emerald-900 dark:text-white' }) => (
-  <div className="glass rounded-[1.5rem] p-5 border border-white/10"><p className="text-xs font-black tracking-widest uppercase text-emerald-500">{title}</p><p className={`text-3xl font-black mt-2 ${valueClassName}`}>{value}</p></div>
-);
-
-const TopBar = ({ onAdd }) => (
-  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"><div><h2 className="text-4xl font-black text-emerald-900 dark:text-white tracking-tight">Catalogue de <span className="text-gradient">Plantes</span></h2><p className="text-emerald-800/50 dark:text-emerald-100/50 font-medium">Gérez votre inventaire avec une précision botanique.</p></div><button onClick={onAdd} className="bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-4 rounded-2xl font-black shadow-xl shadow-emerald-600/20 transition-all flex items-center gap-3"><Plus size={20} />Ajouter une Plante</button></div>
-);
-
-const FilterBar = ({ categories, filteredCount, searchTerm, selectedCategory, setSearchTerm, setSelectedCategory }) => (
-  <div className="flex flex-col lg:flex-row gap-4">
-    <div className="relative flex-1"><Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-emerald-500/40" /><input type="text" placeholder="Rechercher par nom..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full glass pl-14 pr-6 py-4 rounded-[1.5rem] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 font-bold transition-all text-sm" /></div>
-    <div className="flex flex-col sm:flex-row gap-4"><select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)} className="glass px-6 py-4 rounded-[1.5rem] font-bold text-emerald-800 dark:text-emerald-100 appearance-none bg-none outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all text-sm"><option value="ALL">Toutes les Catégories</option>{categories.map((cat) => <option key={cat.id} value={cat.id}>{cat.nom}</option>)}</select><div className="glass px-6 py-4 rounded-[1.5rem] flex items-center justify-center gap-3 font-bold text-emerald-500 text-sm">{filteredCount} Résultats</div></div>
+const MetricCard = ({ title, value, isWarning }) => (
+  <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">{title}</p>
+    <p className={`text-3xl font-bold mt-2 ${isWarning ? 'text-red-500' : 'text-[#274d00]'}`}>{value}</p>
   </div>
 );
 

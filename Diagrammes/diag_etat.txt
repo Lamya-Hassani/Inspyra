@@ -1,0 +1,14 @@
+@startuml Inspyra_State_Commande
+title State Machine — Commande.statut
+
+[*] --> PENDING : création\n(Commande, checkout\nou serializer)
+
+PENDING --> SHIPPED :   Commande expédiée
+PENDING --> CANCELLED : Commande annulée
+
+SHIPPED --> DELIVERED : Commande reçue
+SHIPPED --> CANCELLED : Commande annulée
+
+DELIVERED --> CANCELLED : Commande annulée
+
+@enduml

@@ -36,7 +36,7 @@ const CartDrawer = () => {
                   <ShoppingBag size={24} />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-black text-primary dark:text-white uppercase tracking-tighter">Votre Éden</h2>
+                  <h2 className="text-xl font-black text-primary dark:text-white uppercase tracking-tighter">Votre Éden</h2>
                   <p className="text-[9px] font-black uppercase text-accent tracking-[0.3em]">{cartItems.length} Spécimens</p>
                 </div>
               </div>
@@ -82,7 +82,7 @@ const CartDrawer = () => {
                     <div className="flex-grow flex flex-col justify-between py-2">
                       <div className="space-y-2">
                         <div className="flex items-start justify-between gap-4">
-                          <h4 className="font-black text-primary dark:text-white leading-none uppercase tracking-[-0.02em] text-lg">{item.name}</h4>
+                          <h4 className="font-black text-primary dark:text-white leading-none uppercase tracking-[-0.02em] text-base">{item.name}</h4>
                           <button 
                             onClick={() => removeFromCart(item.planteId)}
                             className="text-rose-300 hover:text-rose-500 transition-colors"
@@ -119,20 +119,20 @@ const CartDrawer = () => {
               <div className="p-8 glass border-t border-white/10 bg-white/5 space-y-8">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-[10px] font-black uppercase text-primary/30 dark:text-white/30 tracking-[0.3em] mb-1">Total de l'immersion</p>
-                    <span className="text-3xl font-black text-primary dark:text-white tracking-tighter">{cartTotal.toFixed(2)} MAD</span>
+                    <p className="text-[9px] font-black uppercase text-primary/30 dark:text-white/30 tracking-[0.3em] mb-1">Total de l'immersion</p>
+                    <span className="text-2xl font-black text-primary dark:text-white tracking-tighter">{cartTotal.toFixed(2)} MAD</span>
                   </div>
                 </div>
                 
                 <Link 
                   to="/checkout"
                   onClick={() => setIsCartOpen(false)}
-                  className="w-full py-6 bg-primary hover:bg-accent text-white rounded-[2rem] font-black flex items-center justify-center gap-4 shadow-3xl shadow-primary/20 transition-all uppercase tracking-[0.2em] text-[11px]"
+                  className="w-full py-5 bg-[#274D00] hover:bg-[#6D58C7] text-white rounded-[2rem] font-black flex items-center justify-center gap-4 shadow-2xl transition-all uppercase tracking-[0.2em] text-[10px]"
                 >
-                  Finaliser la Collection <ArrowRight size={18} />
+                  Commander ma Collection <ArrowRight size={18} />
                 </Link>
                 
-                <p className="text-[9px] font-bold text-primary/30 dark:text-white/30 uppercase tracking-widest text-center">
+                <p className="text-[8px] font-bold text-primary/30 dark:text-white/30 uppercase tracking-widest text-center">
                   Livraison éco-responsable certifiée Inspyra.
                 </p>
               </div>

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { useNavigate } from 'react-router-dom';
-import { CreditCard, Truck, Landmark, ShieldCheck, ChevronLeft } from 'lucide-react';
+import { getImageUrl } from '../services/api';
+import { CreditCard, Truck, Landmark, ShieldCheck, ChevronLeft, ChevronRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const PaymentPage = () => {
@@ -62,7 +63,7 @@ const PaymentPage = () => {
                     </div>
                     <div>
                       <p className="font-black uppercase tracking-tight text-lg">Carte Bancaire</p>
-                      <p className={`text-[10px] uppercase tracking-widest font-bold ${method === 'CARD' ? 'text-white/60' : 'text-primary/30'}`}>Visa, Mastercard, AMEX</p>
+                      <p className={`text-[10px] uppercase tracking-widest font-bold ${method === 'CARD' ? 'text-black/60' : 'text-primary/30'}`}>Visa, Mastercard, AMEX</p>
                     </div>
                   </div>
                   <input type="radio" name="method" value="CARD" checked={method === 'CARD'} onChange={(e) => setMethod(e.target.value)} className="hidden" />
@@ -76,7 +77,7 @@ const PaymentPage = () => {
                     </div>
                     <div>
                       <p className="font-black uppercase tracking-tight text-lg">Paiement Livraison</p>
-                      <p className={`text-[10px] uppercase tracking-widest font-bold ${method === 'COD' ? 'text-white/60' : 'text-primary/30'}`}>Règlement à réception</p>
+                      <p className={`text-[10px] uppercase tracking-widest font-bold ${method === 'COD' ? 'text-black/60' : 'text-primary/30'}`}>Règlement à réception</p>
                     </div>
                   </div>
                   <input type="radio" name="method" value="COD" checked={method === 'COD'} onChange={(e) => setMethod(e.target.value)} className="hidden" />

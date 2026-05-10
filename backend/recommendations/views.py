@@ -4,6 +4,12 @@ from .serializers import UserPreferenceSerializer
 from products.models import Plante
 from products.serializers import PlanteSerializer
 from django.db.models import Q
+from users.permissions import IsAdminOrSuperAdmin
+
+class AdminUserPreferenceListView(generics.ListAPIView):
+    queryset = UserPreference.objects.all().select_related('user')
+    serializer_class = UserPreferenceSerializer
+    permission_classes = [permissions.IsAuthenticated, IsAdminOrSuperAdmin]
 
 class UserPreferenceDetailView(generics.RetrieveUpdateAPIView):
     serializer_class = UserPreferenceSerializer

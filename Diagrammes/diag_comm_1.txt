@@ -1,0 +1,21 @@
+@startuml
+title Communication — Checkout (objets modèle)
+
+object "monPanier : Panier" as P
+object "article_i : ArticlePanier" as A
+object "plante_vendue : Plante" as Pl
+object "nouvelleCommande : Commande" as C
+object "ligne_i : LigneCommande" as L
+object "reglement : Paiement" as Pay
+object "client : Utilisateur" as U
+
+U --> P : 1 : possède le panier
+P --> A : 2 : contient des articles
+A --> Pl : 3 : référence la plante
+P --> C : 4 : donne naissance à
+C --> U : 5 : appartient au client
+C --> L : 6 : détaille avec des lignes
+L --> Pl : 7 : mentionne la plante et le prix 
+C --> Pay : 8 : associée au paiement en attente
+
+@enduml

@@ -14,7 +14,6 @@ const RecentActivityCard = ({ activity = [] }) => (
         </div>
       ))}
     </div>
-    <button className="w-full mt-8 py-4 glass rounded-2xl text-[10px] font-black uppercase tracking-[.25em] text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all border border-emerald-500/20">Explorer les Transactions</button>
   </div>
 );
 

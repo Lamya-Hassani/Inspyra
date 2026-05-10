@@ -1,0 +1,20 @@
+@startuml
+title Séquence — Finaliser la commande (backend)
+
+actor "Client\nconnecté" as C
+
+  participant "Frontend" as P
+  participant "Backend" as backend
+  participant "Base de donnée" as DB
+
+C -> P : demande avec mode de paiement
+P -> backend : exécuter checkout
+backend -> backend : récupérer ou créer le panier
+backend -> backend : créer Commande et lignes\nmettre à jour stocks\ncréer Paiement\nvider le panier
+backend -> DB : enregistrer
+DB --> backend : OK
+backend --> P : confirmation
+P -> C : navigate("/profile")
+
+
+@enduml

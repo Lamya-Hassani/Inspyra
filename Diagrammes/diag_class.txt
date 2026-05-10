@@ -1,0 +1,86 @@
+@startuml
+title Inspyra — Class Diagram (Attributes + Associations)
+
+skinparam classAttributeIconSize 0
+
+class Utilisateur {
+  +role: String
+  +telephone: String
+  +adresse: String
+  +ville: String
+  +codePostal: String
+  +pays: String
+  +dateCreation: DateTime
+}
+
+class Categorie {
+  +nom: String
+}
+
+class Plante {
+  +nom: String
+  +nomScientifique: String
+  +prix: Decimal
+  +stock: Integer
+  +description: Text
+  +besoinEau: String
+  +besoinLumiere: String
+  +temperatureMin: Float
+  +temperatureMax: Float
+  +humidite: Float
+  +typeSol: String
+  +niveauEntretien: String
+  +image: Image
+}
+
+class Commande {
+  +date: DateTime
+  +statut: String
+  +total: Decimal
+}
+
+class LigneCommande {
+  +quantite: Integer
+  +prix: Decimal
+}
+
+class Paiement {
+  +montant: Decimal
+  +methode: String
+  +statut: String
+  +transaction_id: String
+  +date: DateTime
+}
+
+class Panier {
+  +date_creation: DateTime
+  +date_modification: DateTime
+  +total: Decimal
+}
+
+class ArticlePanier {
+  +quantite: Integer
+  +sous_total: Decimal
+}
+
+class UserPreference {
+  +light_level: String
+  +watering_frequency: String
+  +has_pets: Boolean
+  +has_children: Boolean
+  +experience_level: String
+  +primary_goal: String
+}
+
+' Associations (without FK attributes shown)
+Categorie "1" -- "0..*" Plante : classe
+Utilisateur "1" -- "0..*" Commande : passe
+Commande "1" -- "1..*" LigneCommande : contient
+Plante "1" -- "0..*" LigneCommande : concerne
+Commande "1" -- "0..1" Paiement : regle_par
+Utilisateur "1" -- "0..1" Panier : possede
+Panier "1" -- "0..*" ArticlePanier : contient
+Plante "1" -- "0..*" ArticlePanier : concerne
+Utilisateur "1" -- "0..1" UserPreference : definit
+
+@enduml

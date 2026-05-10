@@ -1,15 +1,97 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
-import orderService from '../services/orderService';
-import { User, Package, Settings, LogOut, ChevronRight, Calendar, Sparkles, Leaf, Mail, Shield, Camera } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  Package, Settings, Leaf, User, Camera, LogOut, 
+  ChevronRight, Calendar, Mail, Shield, Sparkles 
+} from 'lucide-react';
+import recommendationService from '../services/recommendationService';
+import userService from '../services/userService';
+import orderService from '../services/orderService';
+import { getImageUrl } from '../services/api';
 
 const ProfilePage = () => {
   const { user, logout } = useAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('orders');
+
+  const [userPrefs, setUserPrefs] = useState(null);
+  const [recoPlants, setRecoPlants] = useState([]);
+  const [recoLoading, setRecoLoading] = useState(false);
+
+  const [profileData, setProfileData] = useState({
+    username: '',
+    email: '',
+    telephone: '',
+    adresse: '',
+    ville: '',
+    codePostal: '',
+    pays: ''
+  });
+  const [updateLoading, setUpdateLoading] = useState(false);
+  const [message, setMessage] = useState({ type: '', text: '' });
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const data = await userService.getProfile();
+        setProfileData({
+          username: data.username || '',
+          email: data.email || '',
+          telephone: data.telephone || '',
+          adresse: data.adresse || '',
+          ville: data.ville || '',
+          codePostal: data.codePostal || '',
+          pays: data.pays || ''
+        });
+      } catch (err) {
+        console.error("Failed to fetch profile:", err);
+      }
+    };
+    fetchProfile();
+  }, []);
+
+  useEffect(() => {
+    const fetchPrefs = async () => {
+      try {
+        setRecoLoading(true);
+        const prefs = await recommendationService.getPreferences();
+        setUserPrefs(prefs);
+        const plants = await recommendationService.getRecommendations();
+        setRecoPlants(plants);
+      } catch (err) {
+        console.error("Failed to fetch recommendations:", err);
+      } finally {
+        setRecoLoading(false);
+      }
+    };
+    
+    if (activeTab === 'preferences') {
+      fetchPrefs();
+    }
+  }, [activeTab]);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setProfileData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault();
+    setUpdateLoading(true);
+    setMessage({ type: '', text: '' });
+    try {
+      await userService.updateProfile(profileData);
+      setMessage({ type: 'success', text: 'Profil mis à jour avec succès !' });
+    } catch (err) {
+      console.error(err);
+      setMessage({ type: 'error', text: 'Erreur lors de la mise à jour.' });
+    } finally {
+      setUpdateLoading(false);
+    }
+  };
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -27,7 +109,7 @@ const ProfilePage = () => {
 
   const tabs = [
     { id: 'orders', label: 'Mes Archives', icon: Package },
-    { id: 'settings', label: 'Confidentialité', icon: Settings },
+    { id: 'settings', label: 'Profil & Sécurité', icon: Settings },
     { id: 'preferences', label: 'Style Botanique', icon: Leaf },
   ];
 
@@ -39,256 +121,379 @@ const ProfilePage = () => {
     }
   };
 
+  const getPreferenceLabel = (key, value) => {
+    const labels = {
+      light_level: { LOW: 'Faible', MEDIUM: 'Indirecte', HIGH: 'Vive' },
+      watering_frequency: { RARE: 'Rare', MODERATE: 'Modérée', FREQUENT: 'Fréquente' },
+      experience_level: { BEGINNER: 'Débutant', INTERMEDIATE: 'Intermédiaire', EXPERT: 'Expert' },
+      primary_goal: { DECORATION: 'Décoration', AIR_PURIFYING: 'Purification', MEDICINAL: 'Médicinal', COLLECTION: 'Collection' }
+    };
+    return labels[key]?.[value] || value;
+  };
+
   return (
-    <div className="relative min-h-screen max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-12 pb-32 pt-12 overflow-hidden">
-      {/* Decorative Premium Glows */}
-      <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-accent/10 rounded-full blur-[120px] -z-10 pointer-events-none animate-soft-pulse"></div>
-      <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-lavender/10 rounded-full blur-[120px] -z-10 pointer-events-none"></div>
+    <div className="min-h-screen bg-white">
+      <div className="max-w-7xl mx-auto px-6 pt-5 pb-20">
+        
+        {/* Header Section */}
+        <div className="mb-20">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-12 h-1 bg-[#6D58C7] rounded-full"></div>
+            <p className="text-[11px] font-black uppercase tracking-[0.4em] text-[#6D58C7]">Espace Client</p>
+          </div>
+          <h1 className="text-4xl md:text-5xl font-bold text-[#274d00] mb-4r">Mon Compte</h1>
+          <p className="text-lg text-gray-400 mt-4 font-medium italic max-w-2xl">
+            "Bienvenue dans votre sanctuaire végétal. Gérez vos commandes et vos préférences ici."
+          </p>
+        </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-12 lg:gap-20 relative z-10">
-
-        {/* Sidebar - Editorial Style */}
-        <aside className="lg:col-span-1 space-y-12">
-          {/* User Profile Card */}
-          <div className="glass-premium p-10 rounded-[3.5rem] border border-white/10 text-center space-y-8 relative overflow-hidden group shadow-3xl">
-            <div className="relative w-32 h-32 mx-auto">
-              <div className="w-full h-full rounded-full bg-gradient-to-br from-white to-periwinkle border-8 border-white/20 shadow-2xl flex items-center justify-center text-primary relative z-10">
-                <User size={56} strokeWidth={1} />
+        <div className="flex flex-col lg:flex-row gap-8">
+          
+          {/* Sidebar Navigation */}
+          <div className="w-full lg:w-72 flex-shrink-0">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="p-8 bg-gradient-to-br from-[#274d00] to-[#6D58C7] text-white flex flex-col items-center relative overflow-hidden">
+                {/* Subtle Decorative Circle */}
+                <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+                
+                <div className="w-24 h-24 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white mb-4 border-4 border-white/30 shadow-lg">
+                  <User size={48} strokeWidth={1.5} />
+                </div>
+                <h2 className="font-bold text-xl tracking-tight">{user?.username}</h2>
+                <div className="mt-2 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full border border-white/20">
+                  <p className="text-white text-[10px] font-black uppercase tracking-[0.2em]">{user?.role || 'Client Privilégié'}</p>
+                </div>
               </div>
-              <button className="absolute bottom-1 right-1 p-3 bg-accent text-white rounded-2xl shadow-2xl hover:scale-110 transition-transform z-20">
-                <Camera size={16} />
-              </button>
-            </div>
-
-            <div className="space-y-3">
-              <h2 className="text-2xl font-black text-primary dark:text-white uppercase tracking-tighter">{user?.username || 'Curateur'}</h2>
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass border border-white/20">
-                <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse"></span>
-                <p className="text-[9px] font-black text-accent uppercase tracking-[0.3em]">{user?.role || 'Membre Élite'}</p>
-              </div>
+              <nav className="p-3 space-y-1">
+                {tabs.map((tab) => {
+                  const Icon = tab.icon;
+                  const isActive = activeTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`w-full flex items-center gap-4 px-5 py-4 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${
+                        isActive 
+                        ? 'bg-purple-50 text-[#6D58C7] shadow-sm ring-1 ring-purple-100' 
+                        : 'text-gray-500 hover:bg-green-50 hover:text-[#274d00]'
+                      }`}
+                    >
+                      <Icon size={18} className={isActive ? 'text-[#6D58C7]' : 'text-gray-400'} />
+                      {tab.label}
+                    </button>
+                  );
+                })}
+              </nav>
             </div>
           </div>
 
-          {/* Navigation - Minimalist */}
-          <nav className="glass border border-white/10 rounded-[2.5rem] p-3 shadow-xl space-y-2">
-            {tabs.map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
-
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`relative w-full flex items-center gap-4 px-6 py-5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 ${isActive ? 'text-white' : 'text-primary/50 dark:text-white/50 hover:text-accent'}`}
+          {/* Main Content Area */}
+          <div className="flex-grow">
+            <AnimatePresence mode="wait">
+              
+              {/* ORDERS TAB */}
+              {activeTab === 'orders' && (
+                <motion.div
+                  key="orders"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="space-y-6"
                 >
-                  {isActive && (
-                    <motion.div
-                      layoutId="profile-tab"
-                      className="absolute inset-0 bg-primary shadow-2xl rounded-2xl"
-                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                    />
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-xl font-bold text-gray-800 flex items-center gap-3">
+                      <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                        <Package className="text-[#274d00]" size={18} />
+                      </div>
+                      Mes Commandes
+                    </h2>
+                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest bg-gray-100 px-3 py-1 rounded-full">
+                      {orders.length} Expéditions
+                    </span>
+                  </div>
+
+                  {loading ? (
+                    <div className="space-y-4">
+                      {[1, 2, 3].map(i => (
+                        <div key={i} className="h-16 bg-white rounded-xl border border-gray-100 animate-pulse"></div>
+                      ))}
+                    </div>
+                  ) : orders.length === 0 ? (
+                    <div className="bg-white p-16 rounded-2xl shadow-sm border border-gray-100 text-center">
+                      <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <Package size={40} className="text-gray-300" />
+                      </div>
+                      <p className="text-gray-500 font-medium italic mb-6">Votre historique est encore vierge.</p>
+                      <Link to="/shop" className="inline-block px-8 py-3 bg-[#274d00] text-white rounded-xl font-bold text-sm shadow-lg hover:bg-[#1a3400] transition-all">
+                        Découvrir la boutique
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="bg-white rounded-[2rem] shadow-xl shadow-gray-100/50 border border-gray-100 overflow-hidden">
+                      <div className="overflow-x-auto custom-scrollbar max-h-[600px]">
+                        <table className="w-full text-left border-collapse">
+                          <thead>
+                            <tr className="bg-gray-50/50 border-b border-gray-100">
+                              <th className="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">ID Commande</th>
+                              <th className="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Date d'achat</th>
+                              <th className="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Total</th>
+                              <th className="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Statut</th>
+                              <th className="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-50">
+                            {orders.map((order) => (
+                              <tr key={order.id} className="hover:bg-purple-50/30 transition-colors group">
+                                <td className="px-8 py-6">
+                                  <div className="flex items-center gap-4">
+                                    <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center shrink-0 group-hover:bg-white transition-colors">
+                                      <Package className="text-[#274d00]" size={18} />
+                                    </div>
+                                    <span className="font-black text-[#6D58C7] text-sm">#ORD-{order.id}</span>
+                                  </div>
+                                </td>
+                                <td className="px-8 py-6">
+                                  <div className="flex items-center gap-3">
+                                    <Calendar size={14} className="text-gray-400" />
+                                    <span className="text-xs font-bold text-gray-600 uppercase tracking-widest">
+                                      {new Date(order.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                    </span>
+                                  </div>
+                                </td>
+                                <td className="px-8 py-6 text-sm font-black text-gray-800">{order.total} MAD</td>
+                                <td className="px-8 py-6">
+                                  <span className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest border ${
+                                    order.statut === 'DELIVERED' 
+                                    ? 'bg-green-50 text-[#274d00] border-green-100 shadow-sm shadow-green-50' 
+                                    : 'bg-purple-50 text-[#6D58C7] border-purple-100 shadow-sm shadow-purple-50'
+                                  }`}>
+                                    {order.statut}
+                                  </span>
+                                </td>
+                                <td className="px-8 py-6 text-center">
+                                  <button className="w-10 h-10 bg-gray-50 rounded-xl text-gray-400 hover:bg-[#6D58C7] hover:text-white flex items-center justify-center mx-auto transition-all shadow-sm">
+                                    <ChevronRight size={18} />
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
                   )}
-                  <span className="relative z-10 flex items-center gap-4">
-                    <Icon size={16} className={isActive ? 'text-white' : 'text-accent/60'} />
-                    {tab.label}
-                  </span>
-                </button>
-              );
-            })}
+                </motion.div>
+              )}
 
-            <div className="h-px bg-primary/5 my-4 mx-6" />
-
-            <button
-              onClick={logout}
-              className="w-full flex items-center gap-4 px-6 py-5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-rose-500 hover:bg-rose-500/10 transition-all text-left"
-            >
-              <LogOut size={16} /> Quitter la Session
-            </button>
-          </nav>
-        </aside>
-
-        {/* Main Content Area */}
-        <main className="lg:col-span-3">
-          <AnimatePresence mode="wait">
-
-            {/* ORDERS TAB */}
-            {activeTab === 'orders' && (
-              <motion.div
-                key="orders"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                className="space-y-12"
-              >
-                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
-                  <div className="space-y-4">
-                    <h3 className="text-6xl font-black text-primary dark:text-white uppercase tracking-[-0.04em] leading-none">
-                      Vos <br/> <span className="text-accent italic">Archives.</span>
-                    </h3>
-                  </div>
-                  <span className="px-6 py-2.5 rounded-full glass border border-white/10 text-[9px] font-black uppercase text-primary/40 dark:text-white/40 tracking-[0.4em]">
-                    {orders.length} Expéditions
-                  </span>
-                </div>
-
-                {loading ? (
-                  <div className="space-y-6">
-                    {[1, 2, 3].map(i => (
-                      <div key={i} className="h-32 bg-primary/5 rounded-[2.5rem] animate-pulse"></div>
-                    ))}
-                  </div>
-                ) : orders.length === 0 ? (
-                  <div className="glass-premium p-24 rounded-[4rem] text-center space-y-10 shadow-3xl">
-                    <div className="w-24 h-24 glass border border-white/10 rounded-full flex items-center justify-center mx-auto text-primary/10">
-                      <Package size={48} />
+              {/* SETTINGS TAB */}
+              {activeTab === 'settings' && (
+                <motion.div
+                  key="settings"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8"
+                >
+                  <div className="flex items-center gap-3 mb-8 pb-4 border-b border-gray-50">
+                    <div className="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center">
+                      <Settings className="text-[#6D58C7]" size={20} />
                     </div>
-                    <div className="space-y-4">
-                      <h4 className="text-3xl font-black text-primary dark:text-white uppercase tracking-tighter">Éden Vierge</h4>
-                      <p className="text-primary/40 dark:text-white/40 font-medium italic max-w-sm mx-auto">Votre collection personnelle attend son premier spécimen.</p>
-                    </div>
-                    <Link to="/shop" className="inline-flex items-center gap-4 px-12 py-5 bg-primary text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-3xl hover:bg-accent transition-all">
-                      Commencer l'immersion <ChevronRight size={16} />
-                    </Link>
+                    <h2 className="text-xl font-bold text-gray-800">Paramètres du Profil</h2>
                   </div>
-                ) : (
-                  <div className="space-y-6">
-                    {orders.map((order, index) => (
-                      <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        key={order.id}
-                        className="glass-premium p-8 sm:p-10 rounded-[3rem] border border-white/10 hover:border-accent/40 hover:shadow-3xl transition-all duration-700 group relative overflow-hidden"
-                      >
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-8">
-                          <div className="flex items-center gap-8">
-                            <div className="w-20 h-20 rounded-3xl glass border border-white/20 flex items-center justify-center text-primary font-black text-2xl shadow-inner group-hover:scale-105 transition-transform duration-700">
-                              #{order.id}
-                            </div>
-                            <div className="space-y-2">
-                              <div className="flex items-center gap-3">
-                                <Calendar size={14} className="text-accent" />
-                                <span className="text-[10px] font-black text-primary/40 dark:text-white/40 uppercase tracking-[0.2em]">
-                                  {new Date(order.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
-                                </span>
-                              </div>
-                              <h4 className="font-black text-primary dark:text-white uppercase tracking-tight text-3xl">
-                                {order.total} <span className="text-sm font-bold text-primary/30">MAD</span>
-                              </h4>
-                            </div>
-                          </div>
-                          <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto">
-                            <span className={`px-6 py-2.5 rounded-2xl text-[9px] font-black uppercase tracking-[0.3em] border shadow-sm ${getStatusColor(order.statut)}`}>
-                              {order.statut}
-                            </span>
-                            <button className="w-14 h-14 flex items-center justify-center glass rounded-2xl border border-white/10 text-primary/20 group-hover:bg-primary group-hover:text-white group-hover:border-primary shadow-2xl transition-all duration-700">
-                              <ChevronRight size={24} className="group-hover:translate-x-1 transition-transform" />
-                            </button>
-                          </div>
+
+                  {message.text && (
+                    <div className={`mb-8 p-4 rounded-xl text-[11px] font-black uppercase tracking-widest border ${
+                      message.type === 'success' 
+                      ? 'bg-green-50 border-green-200 text-[#274d00]' 
+                      : 'bg-rose-50 border-rose-200 text-rose-500'
+                    }`}>
+                      {message.text}
+                    </div>
+                  )}
+
+                  <form onSubmit={handleUpdateProfile} className="space-y-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">Identifiant</label>
+                        <div className="relative">
+                          <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" size={16} />
+                          <input
+                            type="text"
+                            name="username"
+                            value={profileData.username}
+                            onChange={handleInputChange}
+                            className="w-full pl-12 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-100 focus:bg-white focus:border-[#6D58C7] focus:ring-4 focus:ring-purple-500/5 outline-none transition-all font-bold text-sm"
+                          />
                         </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                )}
-              </motion.div>
-            )}
-
-            {/* SETTINGS TAB */}
-            {activeTab === 'settings' && (
-              <motion.div
-                key="settings"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                className="space-y-12"
-              >
-                <div className="space-y-4">
-                  <h3 className="text-6xl font-black text-primary dark:text-white uppercase tracking-[-0.04em] leading-none">
-                    Profil <br/> <span className="text-accent italic">Élite.</span>
-                  </h3>
-                </div>
-
-                <div className="glass-premium p-12 sm:p-20 rounded-[4rem] border border-white/10 shadow-3xl space-y-16">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                    <div className="space-y-4">
-                      <label className="text-[9px] font-black uppercase text-accent tracking-[0.4em] flex items-center gap-3">
-                        <User size={14} /> Curateur
-                      </label>
-                      <input
-                        type="text"
-                        readOnly
-                        value={user?.username}
-                        className="w-full px-8 py-6 rounded-[2rem] glass border border-white/10 font-black text-primary dark:text-white text-xl outline-none"
-                      />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">Adresse Email</label>
+                        <div className="relative">
+                          <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" size={16} />
+                          <input
+                            type="email"
+                            name="email"
+                            value={profileData.email}
+                            onChange={handleInputChange}
+                            className="w-full pl-12 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-100 focus:bg-white focus:border-[#6D58C7] focus:ring-4 focus:ring-purple-500/5 outline-none transition-all font-bold text-sm"
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">Contact</label>
+                        <input
+                          type="text"
+                          name="telephone"
+                          value={profileData.telephone}
+                          onChange={handleInputChange}
+                          className="w-full px-5 py-3 rounded-xl bg-gray-50 border border-gray-100 focus:bg-white focus:border-[#6D58C7] outline-none transition-all font-bold text-sm"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">Localisation</label>
+                        <input
+                          type="text"
+                          name="pays"
+                          value={profileData.pays}
+                          onChange={handleInputChange}
+                          className="w-full px-5 py-3 rounded-xl bg-gray-50 border border-gray-100 focus:bg-white focus:border-[#6D58C7] outline-none transition-all font-bold text-sm"
+                        />
+                      </div>
+                      <div className="md:col-span-2 space-y-2">
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">Adresse complète</label>
+                        <input
+                          type="text"
+                          name="adresse"
+                          value={profileData.adresse}
+                          onChange={handleInputChange}
+                          className="w-full px-5 py-3 rounded-xl bg-gray-50 border border-gray-100 focus:bg-white focus:border-[#6D58C7] outline-none transition-all font-bold text-sm"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">Ville</label>
+                        <input
+                          type="text"
+                          name="ville"
+                          value={profileData.ville}
+                          onChange={handleInputChange}
+                          className="w-full px-5 py-3 rounded-xl bg-gray-50 border border-gray-100 focus:bg-white focus:border-[#6D58C7] outline-none transition-all font-bold text-sm"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">Code Postal</label>
+                        <input
+                          type="text"
+                          name="codePostal"
+                          value={profileData.codePostal}
+                          onChange={handleInputChange}
+                          className="w-full px-5 py-3 rounded-xl bg-gray-50 border border-gray-100 focus:bg-white focus:border-[#6D58C7] outline-none transition-all font-bold text-sm"
+                        />
+                      </div>
                     </div>
 
-                    <div className="space-y-4">
-                      <label className="text-[9px] font-black uppercase text-accent tracking-[0.4em] flex items-center gap-3">
-                        <Mail size={14} /> Canal de Contact
-                      </label>
-                      <input
-                        type="email"
-                        readOnly
-                        value={`${user?.username?.toLowerCase().replace(/\s+/g, '')}@inspyra.com`}
-                        className="w-full px-8 py-6 rounded-[2rem] glass border border-white/10 font-black text-primary dark:text-white text-xl outline-none"
-                      />
+                    <div className="pt-6">
+                      <button 
+                        type="submit"
+                        disabled={updateLoading}
+                        className="w-full sm:w-auto px-10 py-4 bg-gradient-to-r from-[#274d00] to-[#6D58C7] text-white rounded-xl font-black uppercase tracking-[0.2em] text-[11px] shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-all disabled:opacity-50"
+                      >
+                        {updateLoading ? 'Mise à jour...' : 'Sauvegarder les modifications'}
+                      </button>
                     </div>
-                  </div>
+                  </form>
+                </motion.div>
+              )}
 
-                  <div className="pt-12 border-t border-primary/5 space-y-8">
-                    <div className="flex items-center gap-4">
-                      <Shield className="text-accent" size={24} />
-                      <h4 className="text-xs font-black uppercase text-primary dark:text-white tracking-[0.2em]">Sécurité du Domaine</h4>
+              {/* PREFERENCES TAB */}
+              {activeTab === 'preferences' && (
+                <motion.div
+                  key="preferences"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="space-y-8"
+                >
+                  <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+                    <div className="flex justify-between items-center mb-10">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center">
+                          <Leaf className="text-[#274d00]" size={20} />
+                        </div>
+                        <h2 className="text-xl font-bold text-gray-800">ADN Botanique</h2>
+                      </div>
+                      <Link to="/plant-finder" className="text-[10px] font-black text-[#6D58C7] hover:text-[#274d00] uppercase tracking-widest bg-purple-50 px-4 py-2 rounded-full transition-all">
+                        Refaire le diagnostic
+                      </Link>
                     </div>
-                    <button className="px-12 py-6 glass border border-accent/20 text-accent rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-accent hover:text-white transition-all shadow-2xl">
-                      Réinitialiser les Clés d'Accès
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            )}
 
-            {/* PREFERENCES TAB */}
-            {activeTab === 'preferences' && (
-              <motion.div
-                key="preferences"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                className="space-y-12"
-              >
-                <div className="space-y-4">
-                  <h3 className="text-6xl font-black text-primary dark:text-white uppercase tracking-[-0.04em] leading-none">
-                    Studio <br/> <span className="text-accent italic">Botanique.</span>
-                  </h3>
-                </div>
-
-                <div className="glass-premium p-20 lg:p-32 rounded-[5rem] text-center space-y-12 shadow-3xl relative overflow-hidden group">
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-accent/20 rounded-full blur-[120px] group-hover:scale-150 transition-transform duration-[2000ms] pointer-events-none"></div>
-
-                  <div className="relative w-32 h-32 glass border border-white/20 rounded-[2.5rem] flex items-center justify-center mx-auto text-accent shadow-3xl group-hover:rotate-12 transition-transform duration-700">
-                    <Sparkles size={56} className="animate-pulse" />
-                  </div>
-
-                  <div className="relative max-w-lg mx-auto space-y-6">
-                    <h4 className="text-4xl font-black text-primary dark:text-white uppercase tracking-tighter leading-none">Architecturer votre Éden</h4>
-                    <p className="text-primary/50 dark:text-white/50 font-medium leading-relaxed italic max-w-sm mx-auto">
-                      Définissez votre profil environnemental pour une curation sur-mesure de vos futurs spécimens.
-                    </p>
+                    {recoLoading ? (
+                      <div className="flex flex-col items-center justify-center py-20 space-y-4">
+                        <div className="w-12 h-12 border-4 border-purple-100 border-t-[#6D58C7] rounded-full animate-spin"></div>
+                        <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest">Analyse en cours...</p>
+                      </div>
+                    ) : userPrefs && userPrefs.experience_level ? (
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {[
+                          { label: 'Lumière', value: getPreferenceLabel('light_level', userPrefs.light_level), color: 'green' },
+                          { label: 'Arrosage', value: getPreferenceLabel('watering_frequency', userPrefs.watering_frequency), color: 'purple' },
+                          { label: 'Expérience', value: getPreferenceLabel('experience_level', userPrefs.experience_level), color: 'green' },
+                          { label: 'Objectif', value: getPreferenceLabel('primary_goal', userPrefs.primary_goal), color: 'purple' },
+                        ].map((item, i) => (
+                          <div key={i} className={`p-5 rounded-2xl border ${item.color === 'green' ? 'bg-green-50 border-green-100' : 'bg-purple-50 border-purple-100'}`}>
+                            <p className={`text-[10px] font-black uppercase tracking-widest mb-2 ${item.color === 'green' ? 'text-green-600' : 'text-purple-600'}`}>{item.label}</p>
+                            <p className="text-sm font-bold text-gray-800 uppercase">{item.value}</p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-16 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                        <p className="text-gray-400 font-medium italic mb-8">Définissez votre profil pour des recommandations sur-mesure.</p>
+                        <Link to="/plant-finder" className="px-10 py-4 bg-[#274d00] text-white rounded-xl font-black uppercase tracking-widest text-[11px] shadow-lg">
+                          Initier le test
+                        </Link>
+                      </div>
+                    )}
                   </div>
 
-                  <Link
-                    to="/plant-finder"
-                    className="relative inline-flex items-center gap-4 px-14 py-6 bg-primary text-white rounded-[2rem] font-black uppercase tracking-widest text-[10px] shadow-3xl hover:bg-accent hover:-translate-y-2 transition-all group/btn"
-                  >
-                    <span className="relative z-10 flex items-center gap-3">Initier le Diagnostique <ChevronRight size={18} /></span>
-                  </Link>
-                </div>
-              </motion.div>
-            )}
+                  {/* Recommendations */}
+                  {!recoLoading && recoPlants.length > 0 && (
+                    <div className="space-y-6">
+                      <div className="flex items-center gap-4">
+                        <h3 className="text-[11px] font-black text-gray-400 uppercase tracking-[0.3em]">Curation pour vous</h3>
+                        <div className="h-px bg-gray-100 flex-grow"></div>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {recoPlants.map((plant) => (
+                          <Link 
+                            key={plant.id} 
+                            to={`/product/${plant.id}`}
+                            className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:border-purple-300 hover:shadow-xl transition-all group"
+                          >
+                            <div className="aspect-[4/5] bg-gray-50 relative overflow-hidden">
+                              <img 
+                                src={getImageUrl(plant.image)} 
+                                alt={plant.nom} 
+                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                              />
+                              <div className="absolute top-3 right-3 px-3 py-1 bg-white/90 backdrop-blur-md rounded-full border border-white/20">
+                                <p className="text-[9px] font-black text-[#274d00] uppercase tracking-tighter">{plant.prix} MAD</p>
+                              </div>
+                            </div>
+                            <div className="p-5">
+                              <p className="text-[9px] font-black text-purple-400 uppercase tracking-widest mb-1">{plant.categorie_nom}</p>
+                              <h4 className="font-bold text-gray-800 text-sm tracking-tight">{plant.nom}</h4>
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </motion.div>
+              )}
 
-          </AnimatePresence>
-        </main>
+            </AnimatePresence>
+          </div>
+        </div>
       </div>
     </div>
   );

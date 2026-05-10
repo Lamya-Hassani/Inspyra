@@ -6,25 +6,34 @@ const UserDetailModal = ({ isOpen, user, onClose, onEdit }) => {
   if (!isOpen || !user) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4">
-      <div className="absolute inset-0 bg-emerald-950/60 backdrop-blur-xl animate-fade-in" onClick={onClose}></div>
-      <div className="glass w-full max-w-2xl rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-12 relative animate-float border border-white/20 shadow-2xl max-h-[95vh] overflow-y-auto custom-scrollbar">
-        <button onClick={onClose} className="absolute top-4 right-4 sm:top-10 sm:right-10 p-2 sm:p-3 hover:bg-white/20 rounded-xl sm:rounded-2xl transition-all"><X /></button>
-        <div className="flex flex-col items-center text-center mb-8 sm:mb-10 pt-4 sm:pt-0">
-          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-[1.5rem] sm:rounded-[2rem] bg-gradient-to-br from-emerald-100 to-emerald-200 border-4 border-white shadow-xl overflow-hidden mb-4">
-            <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`} alt="avatar" />
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/50" onClick={onClose}></div>
+      <div className="bg-white w-full max-w-xl rounded-xl p-8 relative shadow-2xl">
+        <button onClick={onClose} className="absolute top-6 right-6 p-2 text-gray-400 hover:bg-gray-100 rounded-lg transition-colors">
+          <X size={20} />
+        </button>
+        
+        <div className="flex flex-col items-center text-center mb-8 pt-4">
+          <div className="w-20 h-20 rounded-lg bg-gray-50 border border-gray-200 overflow-hidden mb-4">
+            <img src={`https://api.dicebear.com/7.x/initials/svg?seed=${user.username}`} alt="avatar" />
           </div>
-          <h3 className="text-xl sm:text-3xl font-black text-emerald-900 dark:text-white uppercase tracking-tight truncate w-full px-4">{user.username}</h3>
-          <p className="text-emerald-500 font-bold text-xs sm:text-sm truncate w-full px-4">{user.email}</p>
+          <h3 className="text-2xl font-bold text-gray-900">{user.username}</h3>
+          <p className="text-[#92B061] font-bold text-sm lowercase">{user.email}</p>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-8 sm:mb-10 text-left">
-          <InfoCard label="Telephone" value={user.telephone || 'Non renseigne'} />
-          <InfoCard label="Role Systeme" value={user.role} icon={<Shield size={12} className="text-emerald-500" />} />
-          <div className="sm:col-span-2 glass p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-white/10"><p className="text-[9px] sm:text-[10px] font-black uppercase text-emerald-500 tracking-widest mb-1">Localisation</p><p className="text-emerald-900 dark:text-white font-bold text-sm leading-tight">{user.adresse || 'N/A'}</p><p className="text-[10px] sm:text-xs font-medium opacity-60 italic mt-1">{user.ville}, {user.codePostal}, {user.pays}</p></div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+          <InfoCard label="Téléphone" value={user.telephone || '-'} />
+          <InfoCard label="Rôle Système" value={user.role} icon={<Shield size={14} className="text-[#92B061]" />} />
+          <div className="sm:col-span-2 p-4 bg-gray-50 rounded-lg border border-gray-100">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Localisation</p>
+            <p className="text-gray-900 font-bold text-sm">{user.adresse || '-'}</p>
+            <p className="text-xs text-gray-400 font-bold uppercase mt-1">{user.ville} {user.codePostal}</p>
+          </div>
         </div>
-        <div className="flex flex-col sm:flex-row gap-4">
-          <button onClick={onEdit} className="w-full sm:flex-1 py-4 bg-emerald-600 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all hover:bg-emerald-500 shadow-xl shadow-emerald-600/20">Modifier</button>
-          <button onClick={onClose} className="w-full sm:px-8 py-4 glass rounded-2xl font-black uppercase tracking-widest text-[10px] text-emerald-900 dark:text-white border border-white/20">Fermer</button>
+
+        <div className="flex gap-3">
+          <button onClick={onEdit} className="flex-1 py-3 bg-[#274d00] text-white rounded-lg font-bold uppercase tracking-widest text-xs transition-colors hover:bg-[#1e3b00] shadow-lg">Modifier</button>
+          <button onClick={onClose} className="px-8 py-3 bg-white border border-gray-200 text-gray-600 rounded-lg font-bold uppercase tracking-widest text-xs hover:bg-gray-50 transition-colors">Fermer</button>
         </div>
       </div>
     </div>,
@@ -33,9 +42,9 @@ const UserDetailModal = ({ isOpen, user, onClose, onEdit }) => {
 };
 
 const InfoCard = ({ label, value, icon }) => (
-  <div className="glass p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-white/10">
-    <p className="text-[9px] sm:text-[10px] font-black uppercase text-emerald-500 tracking-widest mb-1">{label}</p>
-    <div className="flex items-center gap-2 text-emerald-900 dark:text-white">{icon}<span className="font-black uppercase text-sm">{value}</span></div>
+  <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
+    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">{label}</p>
+    <div className="flex items-center gap-2 text-gray-900 font-bold text-sm">{icon}{value}</div>
   </div>
 );
 

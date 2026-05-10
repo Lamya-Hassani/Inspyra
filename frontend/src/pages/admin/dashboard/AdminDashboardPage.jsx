@@ -41,27 +41,57 @@ const AdminDashboardPage = () => {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', 'Inspyra_Performance_Report.csv');
+    link.setAttribute('download', 'Inspyra_Report.csv');
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
-  if (loading) return <div className="h-full flex flex-col items-center justify-center gap-4 text-emerald-600"><Loader2 className="w-12 h-12 animate-spin" /><p className="font-black uppercase tracking-widest text-sm text-center">Calcul des performances botaniques...</p></div>;
+  if (loading) return (
+    <div className="h-full flex flex-col items-center justify-center gap-4 text-[#274d00]">
+      <Loader2 className="w-10 h-10 animate-spin" />
+      <p className="font-bold text-sm uppercase tracking-widest">Chargement des données...</p>
+    </div>
+  );
 
   return (
-    <div className="animate-fade-in space-y-8">
-      <div className="relative overflow-hidden glass rounded-[2rem] sm:rounded-[3rem] border border-white/10 p-6 sm:p-10">
-        <div className="absolute -top-14 -right-14 w-44 h-44 rounded-full bg-emerald-400/20 blur-3xl"></div>
-        <div className="absolute -bottom-16 -left-20 w-56 h-56 rounded-full bg-emerald-800/20 blur-3xl"></div>
-        <div className="relative flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6">
-          <div className="max-w-xl"><h2 className="text-3xl sm:text-4xl font-black text-emerald-900 dark:text-white tracking-tight leading-tight">Bonjour, <span className="text-gradient">Admin</span></h2><p className="text-xs sm:text-sm text-emerald-800/50 dark:text-emerald-100/50 font-medium mt-1">Le jardin d'Inspyra est en pleine croissance. Voici vos analyses actuelles.</p></div>
-          <div className="flex flex-col sm:flex-row gap-4 w-full xl:w-auto"><button className="glass px-6 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 text-emerald-800 dark:text-emerald-100 hover:bg-white/40 transition-all text-[10px] uppercase tracking-widest"><Calendar size={16} className="text-emerald-500" />Derniers 30 jours</button><button onClick={exportReport} className="bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-4 rounded-2xl font-black shadow-xl shadow-emerald-600/20 transition-all flex items-center justify-center gap-2 text-[10px] uppercase tracking-widest"><Download size={16} />Exporter le Rapport</button></div>
+    <div className="space-y-8">
+      {/* Welcome Section */}
+      <div className="bg-white rounded-[2.5rem] border border-gray-100 p-10 shadow-sm relative overflow-hidden group">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-green-50/50 rounded-full blur-3xl -z-0 translate-x-1/2 -translate-y-1/2"></div>
+        <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 relative z-10">
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-1 bg-[#6D58C7] rounded-full"></div>
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#6D58C7]">Administration</p>
+            </div>
+            <h2 className="text-4xl font-black text-[#274d00] tracking-tight">Bienvenue, Admin</h2>
+            <p className="text-gray-500 mt-2 font-medium italic">"L'état actuel de votre boutique Inspyra en un coup d'œil."</p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <button onClick={exportReport} className="px-8 py-4 bg-[#274d00] text-white rounded-2xl font-black text-[11px] uppercase tracking-widest flex items-center gap-3 hover:bg-[#6D58C7] transition-all shadow-xl hover:shadow-purple-100">
+              <Download size={16} /> Exporter Rapport
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">{stats.map((stat, i) => <DashboardStatCard key={i} {...stat} />)}</div>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8"><SalesChartCard /><RecentActivityCard activity={data?.recent_activity || []} /></div>
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {stats.map((stat, i) => (
+          <DashboardStatCard key={i} {...stat} />
+        ))}
+      </div>
+
+      {/* Charts & Activity */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2">
+          <SalesChartCard />
+        </div>
+        <div>
+          <RecentActivityCard activity={data?.recent_activity || []} />
+        </div>
+      </div>
     </div>
   );
 };

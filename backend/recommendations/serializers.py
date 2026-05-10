@@ -3,9 +3,11 @@ from .models import UserPreference
 from products.serializers import PlanteSerializer
 
 class UserPreferenceSerializer(serializers.ModelSerializer):
+    user_username = serializers.CharField(source='user.username', read_only=True)
+
     class Meta:
         model = UserPreference
-        fields = ['light_level', 'watering_frequency', 'has_pets', 'has_children', 'experience_level', 'primary_goal']
+        fields = ['id', 'user_username', 'light_level', 'watering_frequency', 'has_pets', 'has_children', 'experience_level', 'primary_goal']
 
     def create(self, validated_data):
         user = self.context['request'].user
