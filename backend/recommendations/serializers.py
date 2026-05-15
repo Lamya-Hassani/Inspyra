@@ -7,7 +7,7 @@ class UserPreferenceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserPreference
-        fields = ['id', 'user_username', 'light_level', 'watering_frequency', 'has_pets', 'has_children', 'experience_level', 'primary_goal']
+        fields = ['id', 'user_username', 'light_level', 'watering_frequency', 'experience_level', 'primary_goal']
 
     def create(self, validated_data):
         user = self.context['request'].user

@@ -11,8 +11,8 @@ const recommendationService = {
     return response.data;
   },
 
-  getRecommendations: async () => {
-    const response = await api.get('/recommendations/recommendations/');
+  getRecommendations: async (params = {}) => {
+    const response = await api.get('/recommendations/recommendations/', { params });
     return response.data;
   }
 };

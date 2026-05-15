@@ -22,9 +22,6 @@ class UserPreference(models.Model):
     ]
     watering_frequency = models.CharField(max_length=10, choices=WATER_CHOICES, default='MODERATE')
     
-    # Environment
-    has_pets = models.BooleanField(default=False)
-    has_children = models.BooleanField(default=False)
     
     # Experience
     EXPERIENCE_CHOICES = [

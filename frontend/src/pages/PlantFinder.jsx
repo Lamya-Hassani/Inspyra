@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Sun, Droplets, User, Leaf, ShieldCheck, 
+import {
+  Sun, Droplets, User, Leaf,
   ArrowRight, ArrowLeft, RefreshCw, Sparkles,
   AlertCircle
 } from 'lucide-react';
@@ -61,9 +61,7 @@ const PlantFinder = () => {
     light_level: 'MEDIUM',
     watering_frequency: 'MODERATE',
     experience_level: 'BEGINNER',
-    primary_goal: 'DECORATION',
-    has_pets: false,
-    has_children: false
+    primary_goal: 'DECORATION'
   });
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -128,7 +126,7 @@ const PlantFinder = () => {
                 <h1 className="text-4xl md:text-5xl font-bold text-[#274d00] tracking-tight">Vos Recommandations</h1>
                 <p className="text-gray-500 mt-2 font-medium italic">"Voici les plantes qui s'épanouiront le mieux dans votre écosystème."</p>
               </div>
-              <button 
+              <button
                 onClick={() => setShowResults(false)}
                 className="px-6 py-2 bg-gray-50 border border-gray-100 rounded-xl font-bold text-sm hover:bg-gray-100 flex items-center gap-2 transition-all shadow-sm"
               >
@@ -148,7 +146,7 @@ const PlantFinder = () => {
               <AlertCircle className="w-12 h-12 text-gray-300 mx-auto mb-4" />
               <h2 className="text-xl font-bold mb-2">Aucun résultat exact</h2>
               <p className="text-gray-500 mb-8">Nous n'avons pas trouvé de plantes correspondant à tous vos critères.</p>
-              <button 
+              <button
                 onClick={() => setShowResults(false)}
                 className="px-8 py-3 bg-[#274d00] text-white rounded-lg font-bold"
               >
@@ -169,7 +167,7 @@ const PlantFinder = () => {
         {/* Progress */}
         <div className="flex gap-2 mb-10">
           {steps.map((_, idx) => (
-            <div 
+            <div
               key={idx}
               className={`h-2 flex-1 rounded-full ${idx <= currentStep ? 'bg-[#92B061]' : 'bg-gray-100'}`}
             />
@@ -191,11 +189,10 @@ const PlantFinder = () => {
               <button
                 key={option.value}
                 onClick={() => handleSelect(step.id, option.value)}
-                className={`p-5 rounded-xl text-left border-2 transition-all ${
-                  preferences[step.id] === option.value 
-                  ? 'border-[#92B061] bg-[#92B061]/5' 
-                  : 'border-gray-100 bg-white hover:border-gray-200'
-                }`}
+                className={`p-5 rounded-xl text-left border-2 transition-all ${preferences[step.id] === option.value
+                    ? 'border-[#92B061] bg-[#92B061]/5'
+                    : 'border-gray-100 bg-white hover:border-gray-200'
+                  }`}
               >
                 <div className="font-bold text-lg text-gray-900">{option.label}</div>
                 <div className="text-sm text-gray-500">{option.desc}</div>
@@ -203,21 +200,6 @@ const PlantFinder = () => {
             ))}
           </div>
 
-          {currentStep === steps.length - 1 && (
-            <div className="mb-8 p-4 bg-gray-50 rounded-xl">
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input 
-                  type="checkbox" 
-                  className="w-5 h-5 accent-[#274d00] rounded"
-                  checked={preferences.has_pets}
-                  onChange={(e) => setPreferences({...preferences, has_pets: e.target.checked})}
-                />
-                <span className="text-sm font-bold text-gray-700 flex items-center gap-2">
-                   <ShieldCheck size={18} /> J'ai des animaux de compagnie
-                </span>
-              </label>
-            </div>
-          )}
 
           <div className="flex justify-between items-center pt-8 border-t border-gray-100">
             <button
