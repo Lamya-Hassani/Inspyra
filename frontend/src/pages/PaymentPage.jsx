@@ -44,35 +44,42 @@ const PaymentPage = () => {
         
         {/* Left: Editorial Payment Section */}
         <div className="flex-grow space-y-16">
-          <div className="space-y-6">
-            <h1 className="text-6xl sm:text-7xl font-black text-primary dark:text-white uppercase tracking-[-0.04em] leading-none">
-              Finaliser <br/> <span className="text-accent italic">l'Immersion.</span>
-            </h1>
-            <p className="text-sm font-black text-primary/30 dark:text-white/30 uppercase tracking-[0.4em]">Étape 03 — Acquisition Sécurisée</p>
-          </div>
-
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-1 bg-[#6D58C7] rounded-full"></div>
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#6D58C7]">
+                  Payer en Toute Confiance
+                </p>
+              </div>
+              <h1 className="text-4xl md:text-6xl font-black text-[#274d00] tracking-tight">
+                Finalisez votre Collection
+              </h1>
+              <p className="text-gray-500 max-w-md font-medium italic">
+                "Chaque plante que vous avez choisie est une promesse de sérénité."
+              </p>
+            </div>
           <div className="space-y-10">
             <div className="glass-premium p-10 rounded-[3.5rem] border border-white/10 shadow-3xl space-y-10">
               <h2 className="text-xs font-black text-accent uppercase tracking-[0.5em]">Mode de Règlement</h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <label className={`relative group p-8 rounded-[2.5rem] border-2 cursor-pointer transition-all duration-500 overflow-hidden ${method === 'CARD' ? 'border-primary bg-primary text-white shadow-3xl' : 'glass border-white/10 hover:border-accent/40 text-primary dark:text-white'}`}>
+                <label className={`relative group p-8 rounded-[2.5rem] border-2 cursor-pointer transition-all duration-500 overflow-hidden ${method === 'CARD' ? 'border-primary bg-primary text-black shadow-3xl' : 'glass border-white/10 hover:border-accent/40 text-black dark:text-white'}`}>
                   <div className="flex flex-col gap-6 relative z-10">
-                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-colors ${method === 'CARD' ? 'bg-white text-primary' : 'bg-primary/5 text-primary'}`}>
+                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-colors ${method === 'CARD' ? 'bg-white text-black' : 'bg-primary/5 text-black'}`}>
                       <CreditCard size={28} />
                     </div>
                     <div>
                       <p className="font-black uppercase tracking-tight text-lg">Carte Bancaire</p>
-                      <p className={`text-[10px] uppercase tracking-widest font-bold ${method === 'CARD' ? 'text-black/60' : 'text-primary/30'}`}>Visa, Mastercard, AMEX</p>
+                      <p className={`text-[10px] uppercase tracking-widest font-bold ${method === 'CARD' ? 'text-black/60' : 'text-black/30'}`}>Visa, Mastercard, AMEX</p>
                     </div>
                   </div>
                   <input type="radio" name="method" value="CARD" checked={method === 'CARD'} onChange={(e) => setMethod(e.target.value)} className="hidden" />
                   {method === 'CARD' && <div className="absolute -top-4 -right-4 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>}
                 </label>
 
-                <label className={`relative group p-8 rounded-[2.5rem] border-2 cursor-pointer transition-all duration-500 overflow-hidden ${method === 'COD' ? 'border-primary bg-primary text-white shadow-3xl' : 'glass border-white/10 hover:border-accent/40 text-primary dark:text-white'}`}>
+                <label className={`relative group p-8 rounded-[2.5rem] border-2 cursor-pointer transition-all duration-500 overflow-hidden ${method === 'COD' ? 'border-primary bg-primary text-black shadow-3xl' : 'glass border-white/10 hover:border-accent/40 text-black dark:text-white'}`}>
                   <div className="flex flex-col gap-6 relative z-10">
-                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-colors ${method === 'COD' ? 'bg-white text-primary' : 'bg-primary/5 text-primary'}`}>
+                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-colors ${method === 'COD' ? 'bg-white text-black' : 'bg-primary/5 text-primary'}`}>
                       <Truck size={28} />
                     </div>
                     <div>

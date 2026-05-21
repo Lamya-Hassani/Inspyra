@@ -1,6 +1,6 @@
 from rest_framework import viewsets, views, status
 from rest_framework.response import Response
-from django.db.models import Sum, Count
+from django.db.models import Sum, Count, Q
 from .models import Categorie, Plante
 from .serializers import CategorieSerializer, PlanteSerializer
 from orders.models import Commande
@@ -22,8 +22,41 @@ class PlanteViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         if user.is_authenticated and user.role in ['ADMIN', 'SUPERADMIN']:
-            return Plante.objects.all()
-        return Plante.objects.filter(stock__gt=0)
+            queryset = Plante.objects.all()
+        else:
+            queryset = Plante.objects.filter(stock__gt=0)
+
+        # Filter by category
+        categorie = self.request.query_params.get('categorie')
+        if categorie and categorie != 'all':
+            queryset = queryset.filter(categorie_id=categorie)
+
+        # Filter by maximum price
+        max_price = self.request.query_params.get('max_price')
+        if max_price:
+            try:
+                queryset = queryset.filter(prix__lte=float(max_price))
+            except ValueError:
+                pass
+
+        # Filter by search query
+        search = self.request.query_params.get('search')
+        if search:
+            queryset = queryset.filter(
+                Q(nom__icontains=search) |
+                Q(nomScientifique__icontains=search) |
+                Q(description__icontains=search)
+            )
+
+        # Order by field
+        ordering = self.request.query_params.get('ordering')
+        if ordering:
+            if ordering == '-date':
+                queryset = queryset.order_by('-id')
+            elif ordering in ['prix', '-prix', 'nom', '-nom']:
+                queryset = queryset.order_by(ordering)
+
+        return queryset
 
 class DashboardStatsView(views.APIView):
     permission_classes = [IsAdminOrSuperAdmin]
